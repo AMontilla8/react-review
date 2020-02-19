@@ -42,10 +42,13 @@
         First, I am going to declare the props I want to pass into my code,
         these props will be used for ALL of the different examples
       */
+      let url = "https://icanhazdadjoke.com/slack";
+
       function callback(value){
         console.log("Child Element returned value: "+value)
         return value;
       }
+
       let props = {bob:"frank",jeff:"Adam",callback:callback};
 
       /*
@@ -53,6 +56,7 @@
         of DOM manipulation, nothing fancy here, everything contained in the
         list function you've already learned
       */
+
       const jsContainer = document.querySelector("#js_container");
       function list(props){
         let list = document.createElement('ul');
@@ -95,14 +99,26 @@
         }
         update = e => {
           this.setState({
-            name: e.target.value
+            name: e.target.value,
+            joke:""
           });
         };
         componentDidUpdate() {
-          console.log("Component has updated! Name is: "+this.state.name);
+          console.log("Component has updated! Name is: "+this.state);
         }
         componentDidMount(){
-          console.log("Class Component has Mounted, name is: "+this.state.name)
+          console.log("Class Component has Mounted, name is: "+this.state)
+        }
+
+        getDadJoke=()=>{
+          fetch(url)
+            .then(res=>{
+              return res.json();
+            })
+            .then(res=>{
+              console.log(res);
+              this.setState({joke:res.attachments[0].text})
+            })
         }
         render() {
           return (
@@ -118,7 +134,9 @@
               </ul>
               <input value={this.state.name} onChange={this.update} />
               <button onClick={()=>{this.props.callback(this.state.name)}}>Pass State Up</button>
+              <button onClick={this.getDadJoke}>get dad joke</button>
               <h5>{this.state.name}</h5>
+              <h3>{this.state.joke}</h3>
             </div>
           );
         }

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add React in One Minute</title>
+    <script src="https://unpkg.com/react@16.8.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.8.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <h2>The different ways to use React</h2>
+    <p>This page demonstrates using React with no build tooling.</p>
+
+    <!-- We will put our React component inside this div. -->
+
+    <div>
+      <h1>JavaScript Container</h1>
+      <div id="js_container"></div>
+    </div>
+
+    <div>
+      <h1>React Class Container</h1>
+      <div id="react_class_container"></div>
+    </div>
+
+    <div>
+      <h1>React Stateless Function Container</h1>
+      <div id="react_function_container"></div>
+    </div>
+    <div>
+      <h1>React Stateful Function Container</h1>
+      <div id="react_stateful_function_container"></div>
+    </div>
+
+    <!-- Load React. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+
+    <!-- Load our React component. -->
+
+    <script type="text/babel">
+      /*
+        First, I am going to declare the props I want to pass into my code,
+        these props will be used for ALL of the different examples
+      */
+      function callback(value){
+        console.log("Child Element returned value: "+value)
+        return value;
+      }
+      let props = {bob:"frank",jeff:"Adam",callback:callback};
+
+      /*
+        Next, we're going to create an element which follows the traditional rules
+        of DOM manipulation, nothing fancy here, everything contained in the
+        list function you've already learned
+      */
+      const jsContainer = document.querySelector("#js_container");
+      function list(props){
+        let list = document.createElement('ul');
+        let input = document.createElement('input');
+        let showInput = document.createElement('h5');
+        let button = document.createElement('button');
+        button.innerText = "Send Input to Parent Scope";
+        button.addEventListener('click',(e)=>{
+          props.callback(input.value)
+        })
+        input.addEventListener('change',(e)=>{
+          showInput.innerText = e.target.value;
+
+        })
+
+        let items = Object.keys(props).map(key => {
+          let item = document.createElement('li');
+          item.innerText = `${key}: ${props[key]}`;
+          return item;
+        }).forEach(item=>{
+          list.appendChild(item);
+        })
+        jsContainer.appendChild(list);
+        jsContainer.appendChild(input);
+        jsContainer.appendChild(button);
+        jsContainer.appendChild(showInput);
+      }
+      list(props);
+      /*
+        Now we're going to put together a React class component! This allows us
+        to have state, and we can update that state!
+      */
+      const classContainer = document.querySelector("#react_class_container");
+      class Root extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            name: "Noah"
+          };
+        }
+        update = e => {
+          this.setState({
+            name: e.target.value
+          });
+        };
+        componentDidUpdate() {
+          console.log("Component has updated! Name is: "+this.state.name);
+        }
+        componentDidMount(){
+          console.log("Class Component has Mounted, name is: "+this.state.name)
+        }
+        render() {
+          return (
+            <div>
+              <ul>
+                {Object.keys(this.props).map(key => {
+                  return (
+                    <li key={key}>
+                      {key}: {this.props[key]}
+                    </li>
+                  );
+                })}
+              </ul>
+              <input value={this.state.name} onChange={this.update} />
+              <button onClick={()=>{this.props.callback(this.state.name)}}>Pass State Up</button>
+              <h5>{this.state.name}</h5>
+            </div>
+          );
+        }
+      }
+      ReactDOM.render( <Root {...props}/>, classContainer);
+
+
+      /*
+        Now, we're going to create our first React Component. This is a
+        stateless component that doesn't have the ability to update itself
+      */
+      const functionContainer = document.querySelector("#react_function_container");
+      function ListStuff(props){
+        let input = React.createRef();
+        return (<div><ul>
+          {Object.keys(props).map(key => {
+            return (
+              <li key={key}>
+                {key}: {props[key]}
+              </li>
+            );
+          })}
+        </ul>
+        <input placeholder="noah" ref={input}/>
+        <button onClick={()=>{
+          console.log(input);
+          props.callback(input.current.value);
+
+        }}><pre>Pass prop.bob up</pre></button>
+        </div>)
+      }
+      ReactDOM.render(<ListStuff {...props}/>, functionContainer);
+
+      /*
+        Lastly, we're going to create a stateful function. This is a near
+        feature to React, and basically lets us create discrete state variables
+      */
+      const functionStatefulContainer = document.querySelector("#react_stateful_function_container");
+      function ListStuffWithState(props){
+        const [name, setName] = React.useState("noah");
+
+        return (<div><ul>
+          {Object.keys(props).map(key => {
+            return (
+              <li key={key}>
+                {key}: {props[key]}
+              </li>
+            );
+          })}
+        </ul>
+        <input placeholder="noah" value={name} onChange={(e)=>{setName(e.target.value)}}/>
+        <button onClick={()=>{props.callback(name)}}>Pass State Up</button>
+        <h5>{name}</h5>
+        </div>)
+      }
+      ReactDOM.render(<ListStuffWithState {...props}/>, functionStatefulContainer);
+
+
+
+
+
+    </script>
+  </body>
+</html>
